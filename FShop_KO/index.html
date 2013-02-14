@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="HandheldFriendly" content="True" />
     <meta name="MobileOptimized" content="320" />
-    <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=0" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
@@ -29,6 +29,11 @@
     <script src="http://code.jquery.com/jquery.min.js"></script>
     <script src="/Content/jquery.flexslider-min.js"></script>
 
+    <style>
+        .maxw90 { max-width: 90%; }
+        .lead  { font-size: 15px; line-height: 19px; }
+    </style>
+        
     <script>
         function CartItem(product) {
             this.product = product;
@@ -166,32 +171,41 @@
     </script>
 </head>
 <body>
-    <section class="container">
-        <h3>Flower Shop <sup><i class="icon-leaf"></i></sup></h3>
-        <p class="lead muted">With this Application you can buy your favorite flower as a gift or for your home, it's up to you! Check out our store by choosing a category!</p>
-
-        <ul class="nav nav-tabs" data-bind="foreach: categories">
-            <li data-bind="attr:  {'class' : ($root.selectedCategory() === $data) ? 'active': undefined  }">
-                <a href="#" data-bind="text: CategoryName, click: $root.selectCategory"></a>
-            </li>
-        </ul>
-
-        <div class="flexslider">
-            <ul class="slides" data-bind="foreach: flowerList">
-                <li>
-                    <img data-bind="attr: {src: ImageUrl}" />
-                    <div class="info">
-                        <h3 data-bind="text: Name"></h3>
-                        <span>Price:</span><span data-bind="text: Price"></span>
-                        <div class="btn pull-right" data-bind="click: $root.cart.add"><i class="icon-plus"></i>Add to cart</div>
-                    </div>
-                </li>
-            </ul>
-            <div class="flex-loading" style="display: none;"><img src="Content/ajax-loader.gif" style="width: 40px !important; height: 40px !important;"/></div>
+    <div class="container">
+        <div class="row">
+            <div class="span12 maxw90">
+                <h3>Flower Shop <sup><i class="icon-leaf"></i></sup></h3>
+                <p class="lead muted max90">With this Application you can buy your favorite flower as a gift or for your home, it's up to you! Check out our store by choosing a category!</p>
+            </div>
         </div>
-
-        <div class="row-fluid paddingb45">
-            <div class="cart span5" data-bind="visible: cart.value() > 0">
+        <div class="row">
+            <div class="span12">
+                <ul class="nav nav-pills" data-bind="foreach: categories">
+                    <li data-bind="attr:  {'class' : ($root.selectedCategory() === $data) ? 'active': '' }">
+                        <a href="#" data-bind="text: CategoryName, click: $root.selectCategory"></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="span12 maxw90">
+                <div class="flexslider">
+                    <ul class="slides" data-bind="foreach: flowerList">
+                        <li>
+                            <img data-bind="attr: {src: ImageUrl}" />
+                            <div class="info">
+                                <h3 data-bind="text: Name"></h3>
+                                <span>Price:</span><span data-bind="text: Price"></span>
+                                <div class="btn pull-right" data-bind="click: $root.cart.add"><i class="icon-plus"></i>Add to cart</div>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="flex-loading" style="display: none;"><img src="Content/ajax-loader.gif" style="width: 40px !important; height: 40px !important;"/></div>
+                </div>
+            </div>
+        </div>
+        <div class="row paddingb45">
+            <div class="cart span5 maxw90" data-bind="visible: cart.value() > 0">
                 <fieldset>
                     <legend>
                         <h3>Cart</h3>
@@ -216,8 +230,7 @@
                     </form>
                 </fieldset>
             </div>
-
-            <div class="span5" data-bind="visible: cart.showSubmitOrderForm">
+            <div class="span5 maxw90" data-bind="visible: cart.showSubmitOrderForm">
                 <fieldset data-bind="with: cart">
                     <legend>
                         <h3>Customer details</h3>
@@ -235,7 +248,7 @@
                 </fieldset>
             </div>
         </div>
-    </section>
+    </div>
 
     <div class="loading" style="display: none;">
         <img src="Content/ajax-loader.gif" />
