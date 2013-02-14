@@ -31,7 +31,17 @@
 
     <style>
         .maxw90 { max-width: 90%; }
-        .lead  { font-size: 15px; line-height: 19px; }
+        .lead  { font-size: 15px; line-height: 19px; margin: -5px 0 5px; }
+        
+        .top-title  { margin: 0 0 10px; }
+        .form-title { margin: 0 0 5px; }
+        
+        .nav-pills { margin: 0 0 5px; }
+        .nav-pills a { font-size: 13px; }
+        
+        .margint15 { margin-top: 15px; }
+        
+        legend { border: 0; margin: 0; }
     </style>
         
     <script>
@@ -167,6 +177,11 @@
                     ko.applyBindings(new ShopModel(context));
                 });
             });
+            
+            $('#app-tab a').click(function (e) {
+                  e.preventDefault();
+                  $(this).tab('show');
+            })
         });
     </script>
 </head>
@@ -175,77 +190,95 @@
         <div class="row">
             <div class="span12 maxw90">
                 <h3>Flower Shop <sup><i class="icon-leaf"></i></sup></h3>
-                <p class="lead muted max90">With this Application you can buy your favorite flower as a gift or for your home, it's up to you! Check out our store by choosing a category!</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="span12">
-                <ul class="nav nav-pills" data-bind="foreach: categories">
-                    <li data-bind="attr:  {'class' : ($root.selectedCategory() === $data) ? 'active': '' }">
-                        <a href="#" data-bind="text: CategoryName, click: $root.selectCategory"></a>
-                    </li>
+                
+                <ul id="app-tab" class="nav nav-tabs">
+                    <li class="active"><a href="#shop">Shop</a></li>
+                    <li class=""><a href="#cart">Cart</a></li>
                 </ul>
-            </div>
-        </div>
-        <div class="row">
-            <div class="span12 maxw90">
-                <div class="flexslider">
-                    <ul class="slides" data-bind="foreach: flowerList">
-                        <li>
-                            <img data-bind="attr: {src: ImageUrl}" />
-                            <div class="info">
-                                <h3 data-bind="text: Name"></h3>
-                                <span>Price:</span><span data-bind="text: Price"></span>
-                                <div class="btn pull-right" data-bind="click: $root.cart.add"><i class="icon-plus"></i>Add to cart</div>
+                
+                <div class="tab-content">
+                      <div class="tab-pane active" id="shop">
+                          <p class="lead muted max90">With this Application you can buy your favorite flower as a gift or for your home, it's up to you! Check out our store by choosing a category!</p>
+                          
+                          <div class="row">
+                                <div class="span12">
+                                    <ul class="nav nav-pills" data-bind="foreach: categories">
+                                        <li data-bind="attr:  {'class' : ($root.selectedCategory() === $data) ? 'active': '' }">
+                                            <a href="#" data-bind="text: CategoryName, click: $root.selectCategory"></a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="span12">
+                                    <div class="flexslider">
+                                        <ul class="slides" data-bind="foreach: flowerList">
+                                            <li>
+                                                <img data-bind="attr: {src: ImageUrl}" />
+                                                <div class="info">
+                                                    <h3 data-bind="text: Name"></h3>
+                                                    <span>Price:</span><span data-bind="text: Price"></span>
+                                                    <div class="btn pull-right" data-bind="click: $root.cart.add"><i class="icon-plus"></i>Add to cart</div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <div class="flex-loading" style="display: none;"><img src="Content/ajax-loader.gif" style="width: 40px !important; height: 40px !important;"/></div>
+                                    </div>
+                                </div>
                             </div>
-                        </li>
-                    </ul>
-                    <div class="flex-loading" style="display: none;"><img src="Content/ajax-loader.gif" style="width: 40px !important; height: 40px !important;"/></div>
-                </div>
-            </div>
-        </div>
-        <div class="row paddingb45">
-            <div class="cart span5 maxw90" data-bind="visible: cart.value() > 0">
-                <fieldset>
-                    <legend>
-                        <h3>Cart</h3>
-                    </legend>
-                    <form class="form-inline fields">
-                        <div class="dropdown">
-                            <div class="btn dropdown-toggle" data-toggle="dropdown">
-                                <span>Cart value:</span>
-                                <span data-bind="text: cart.value"></span>
-                                <span class="caret"></span>
-                            </div>
-
-                            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" data-bind="foreach: cart.items">
-                                <li>
-                                    <span data-bind="text: product.Name"></span>,
-                                    <span data-bind="text: amount"></span>,
-                                    <span data-bind="text: itemValue"></span>
-                                </li>
-                            </ul>
+                      </div>
+                      <div class="tab-pane" id="cart">
+                          <div class="cart span5 maxw90" data-bind="visible: cart.value() == 0">
+                              <p>Your cart is empty.</p>
+                          </div>
+                          
+                          <div class="row paddingb45">                              
+                                <div class="cart span5" data-bind="visible: cart.value() > 0">
+                                    <fieldset>
+                                        <legend>
+                                            <h4 class="form-title">Cart</h4>
+                                        </legend>
+                                        <form class="form-inline fields">
+                                            <div class="dropdown">
+                                                <div class="btn dropdown-toggle" data-toggle="dropdown">
+                                                    <span>Cart value:</span>
+                                                    <span data-bind="text: cart.value"></span>
+                                                    <span class="caret"></span>
+                                                </div>
+                    
+                                                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" data-bind="foreach: cart.items">
+                                                    <li>
+                                                        <span data-bind="text: product.Name"></span>,
+                                                        <span data-bind="text: amount"></span>,
+                                                        <span data-bind="text: itemValue"></span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <a href="#customerDetails" class="btn btn-info" data-bind="click: cart.checkout"><i class="icon-shopping-cart icon-white"></i>Checkout</a>
+                                        </form>
+                                    </fieldset>
+                                </div>
+                                  
+                                <hr />
+                              
+                                <div id="customerDetails" class="span5 margint15" data-bind="visible: cart.showSubmitOrderForm">
+                                    <fieldset data-bind="with: cart">
+                                        <legend>
+                                            <h4 class="form-title">Customer details</h4>
+                                        </legend>
+                                        <div class="fields">
+                                            <h5>Name</h5>
+                                            <input class="input-large" type="text" data-bind="value: customerName" /><br />
+                    
+                                            <h5>Address</h5>
+                                            <input class="input-large" type="text" data-bind="value: customerAddress" /><br />
+                    
+                                            <span class="btn btn-info" data-bind="click: submitOrder">Submit order</span>
+                                            <span class="btn" data-bind="click: cancelCheckout">Cancel</span>
+                                        </div>
+                                    </fieldset>
+                                </div>
                         </div>
-                        <span class="btn btn-info" data-bind="click: cart.checkout"><i class="icon-shopping-cart icon-white"></i>Checkout</span>
-                    </form>
-                </fieldset>
-            </div>
-            <div class="span5 maxw90" data-bind="visible: cart.showSubmitOrderForm">
-                <fieldset data-bind="with: cart">
-                    <legend>
-                        <h3>Customer details</h3>
-                    </legend>
-                    <div class="fields">
-                        <h5>Name</h5>
-                        <input class="input-large" type="text" data-bind="value: customerName" /><br />
-
-                        <h5>Address</h5>
-                        <input class="input-large" type="text" data-bind="value: customerAddress" /><br />
-
-                        <span class="btn btn-info" data-bind="click: submitOrder">Submit order</span>
-                        <span class="btn" data-bind="click: cancelCheckout">Cancel</span>
                     </div>
-                </fieldset>
+              </div>
             </div>
         </div>
     </div>
