@@ -33,6 +33,7 @@
       <Platform>Android</Platform>
     </Folder>
     <Folder Include="Content" />
+    <Folder Include="Images" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="App_Resources\iOS\icon.png" />
@@ -59,8 +60,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\ajax-loader.gif" />
+    <Content Include="Content\jquery.flexslider-min.js" />
     <Content Include="Content\mixins.css" />
     <Content Include="Content\Site.css" />
+    <Content Include="Images\ajax-loader.gif" />
+    <Content Include="Images\bg_direction_nav.png" />
     <Content Include="index.html" />
     <Content Include="css\index.css" />
     <Content Include="js\index.js" />
