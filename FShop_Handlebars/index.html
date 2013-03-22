@@ -1,0 +1,260 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Flower Shop</title>
+
+    <meta charset="utf-8" />
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="320" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="Images/icons/iphone4.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="Images/icons/ipad.png" />
+    <link rel="apple-touch-icon-precomposed" href="Images/icons/android.png" />
+    <link rel="shortcut icon" href="Images/icons/favicon.ico" type="image/x-icon" />
+
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-responsive.min.css" rel="stylesheet">        
+        
+    <link href="/Content/mixins.css" rel="stylesheet" />
+    <script src="http://code.jquery.com/jquery.min.js"></script>
+    <script src="http://include.jaydata.org/datajs-1.0.3.js"></script>
+    <script src="http://include.jaydata.org/jaydata.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.rc.1/handlebars.js"></script>
+    <script type="text/javascript" src="http://include.jaydata.org/jaydatamodules/handlebars.js"></script>        
+    <!--<script src="http://include.jaydata.org/jaydataproviders/oDataProvider.js"></script>-->
+
+
+    <script src="/Content/jquery.flexslider-min.js"></script>
+
+    <style>
+        .maxw90 { max-width: 90%; }
+        .lead  { font-size: 15px; line-height: 19px; margin: -5px 0 5px; }
+        
+        .top-title  { margin: 0 0 10px; }
+        .form-title { margin: 0 0 5px; }
+        
+        .nav-pills { margin: 0 0 5px; }
+        .nav-pills a { font-size: 13px; }
+        
+        .margint15 { margin-top: 15px; }
+        
+        legend { border: 0; margin: 0; }
+    </style>
+        
+    <script>
+
+var apiKey = {
+    ownerId: 'e4fd991d-2edd-43ad-9381-2d591eb0b8dc',
+    appId: '9dbe1bea-20e1-42f7-bbba-4237fd8958c2',
+    serviceName: 'mydatabase'
+};
+
+var CartItem = $data.define("CartItem", {
+    FlowerId: { type: String, key: true },
+    DisplayName: String,
+    Amount: Number,
+    Price: Number,
+    ItemValue: {
+        get: function(){ return this.Amount * this.Price },
+        set: function(){ throw "read only" },
+        notMapped: true
+    }
+}).setStore('default');
+        
+var flowerDB = null;
+        
+$(function () {
+    
+    
+  $data.initService(apiKey).then(function (db) {
+
+     
+    $data("Category", db).query("it.MainMenu === true").then($data.renderItemsTo('#categoryList')).then(displayCart);
+   
+    $data("Category", db).addCommand("select", function(category) { 
+        $data("Flower", db)
+          .query("it.Category_ID === cid", { cid: category.id })
+          .then($data.renderTo('#flowerSliderContainer','flowerListTemplate'))
+          .then(function() {
+              $('.flexslider').flexslider({ animation: "slide" });
+          });
+    });
+    
+    function displayCart(){ 
+        function updateCartItemCount(items) {
+            var cartValue = 0, pieceCount = 0;
+            items.forEach(function(item) {
+               pieceCount += item.Amount;
+               cartValue += item.Price * item.Amount; 
+            });
+            $('#cartItemCount').text(pieceCount);
+        }
+        
+        CartItem.renderItemsTo('#cartItems')
+                .then(updateCartItemCount);
+    }
+      
+    $data("Flower", db).addCommand("putToCart", function(flower){ 
+        CartItem.read(flower.id)
+                .then(function(cartItem) {
+                            cartItem.Amount += 1;
+                            return cartItem.save();
+                      },
+                      function(){
+                          
+                           return CartItem.save({
+                               FlowerId: flower.id, 
+                               DisplayName: flower.Name, 
+                               Amount: 1,
+                               Price: flower.Price
+                           }); 
+                      })
+                .then(displayCart)
+                .fail(function(e) { alert(JSON.stringify(e)) })
+    });
+      
+    $("#submit").click(function() {
+         var apiKey = {
+            ownerId: 'e4fd991d-2edd-43ad-9381-2d591eb0b8dc',
+            appId: '9dbe1bea-20e1-42f7-bbba-4237fd8958c2',
+            serviceName: 'orderapi'
+        };
+        
+        var orderData = {
+            Name: $('#customerName').val(),
+            Address: $('#customerAddress').val()
+        };
+        
+        function displayOrderResult(result) {
+            $('#orderId').html('Order ID: ' + result.Order_ID);
+            
+        }
+        
+        CartItem.readAll().then(function(items) {
+            orderData.OrderItems = items.map(function(item) {
+               return { Product_ID: item.FlowerId, Amount: item.Amount } 
+            });
+            return $data.initService(apiKey)
+                        .then(function(api) { return api.placeOrder(orderData); })
+                        .then(displayOrderResult)
+                        .then(CartItem.removeAll)
+                        .then(displayCart);
+            });
+    });
+      
+    CartItem.addCommand("remove", function(cartItem) {
+        cartItem.remove().then(displayCart);
+    });
+      
+    
+ });
+            
+    $('#app-tab a').click(function (e) {
+          e.preventDefault();
+          $(this).tab('show');
+    })
+});
+
+        
+    </script>
+</head>
+<body>
+    <script id="CartItem" type="text/x-handlebars-template">
+        <li>{{DisplayName}}, {{Amount}}, {{ItemValue}} 
+            <a href="#" style="margin-left:15px" {{entityCommand 'remove'}}>remove</a>
+        </li>
+    </script>
+    
+    <script id="Category" type="text/x-handlebars-template">
+        <li>
+            <a href="#" {{entityCommand 'select'}}>{{CategoryName}}</a>
+        </li>
+    </script>
+
+    <script id="flowerListTemplate" type="text/x-handlebars-template">
+        <div class="flexslider">
+            <ul class="slides" id="flowers">
+                 {{#each .}}
+                    <li>
+                        <img src={{{ImageUrl}}} />
+                        <div class="info">
+                            <h3>{{Name}}</h3>
+                            <span>Price:</span><span>{{Price}}</span>
+                            <div {{entityCommand 'putToCart'}} class="btn pull-right">
+                                <i class="icon-plus"></i>Add to cart
+                            </div>
+                        </div>            
+                    </li>
+                 {{/each}}
+            </ul>
+            <div class="flex-loading" style="display: none;">
+                <img src="Content/ajax-loader.gif" style="width: 40px !important; height: 40px !important;"/>
+            </div>        
+        </div>
+    </script>
+
+    <div class="container">
+        <div class="row">
+            <div class="span12 maxw90">
+                <h3>Flower Shop <sup><i class="icon-leaf"></i></sup></h3>
+                
+                <ul id="app-tab" class="nav nav-tabs">
+                    <li class="active"><a href="#shop">Shop</a></li>
+                    <li class=""><a href="#cart">Cart (<span id="cartItemCount">0</span>)</a></li>
+                </ul>
+                
+                <div class="tab-content">
+                      <div class="tab-pane active" id="shop">
+                          
+                          <div class="row">
+                                <div class="span12">
+                                    <ul class="nav nav-pills" id="categoryList">
+                                    </ul>
+                                </div>
+                                <div class="span12">
+                                    <div id="flowerSliderContainer"></div>
+                                </div>
+                            </div>
+                      </div>
+                    
+                      <div class="tab-pane" id="cart">
+                          <ul id="cartItems">
+                              
+                          </ul>
+                          <div class="row paddingb45">                              
+                                  
+                                <div id="customerDetails" class="span5 margint15">
+                                    <fieldset>
+                                        <legend>
+                                            <h4 class="form-title">Customer details</h4>
+                                        </legend>
+                                        <div id="orderId">
+                                            
+                                        </div>
+                                        <div class="fields">
+                                            <h5>Name</h5>
+                                            <input class="input-large" type="text" id="customerName" />
+                    
+                                            <h5>Address</h5>
+                                            <input class="input-large" type="text" id="customerAddress" />
+                    
+                                        </div>
+                                            <span class="btn btn-info" id="submit">Submit order</span>
+                                    </fieldset>
+                                </div>
+                        </div>
+                    </div>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" style="display: none;">
+        <img src="Content/ajax-loader.gif" />
+    </div>
+
+    <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js"></script>
+</body>
+</html>
